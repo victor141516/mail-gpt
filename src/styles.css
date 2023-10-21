@@ -1,0 +1,49 @@
+#mail-gpt-suggestions_wrapper {
+  --primary: #e0115f;
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 2rem;
+}
+
+#mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+#mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_buttons > button {
+  transition: background 0.1s ease-in-out;
+  background: none;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
+#mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_buttons > button:hover {
+  background: var(--primary);
+  opacity: 0.9;
+  color: white;
+}
+
+#mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_buttons > button:active {
+  transition: opacity 0.1s ease-in-out;
+  opacity: 1;
+  background: var(--primary);
+  color: white;
+}
+
+#mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_loading-indicator {
+  align-self: end;
+}
+
+#mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_loading-indicator > * {
+  display: flex;
+}
+
+#mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_loading-indicator svg {
+  fill: var(--primary);
+}

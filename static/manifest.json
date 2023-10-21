@@ -1,0 +1,27 @@
+{
+  "name": "MailGPT",
+  "description": "Generate email suggestions based the current thread using GPT-4.",
+  "version": "0.1",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://mail.google.com/",
+    "https://api.openai.com/v1/chat/completions"
+  ],
+  "manifest_version": 3
+}
