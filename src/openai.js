@@ -4,8 +4,27 @@ import { fetchEventSource } from "@microsoft/fetch-event-source";
 import EventEmitter from "events";
 /** @typedef {import('@microsoft/fetch-event-source').EventSourceMessage} EventSourceMessage */
 
-const SYSTEM_PROMPT =
-  'You will receive an email thread formatted as JSON with the following structure:\n{subject: string, user: {name: string, address: string}, emails: [{header: "${date} ${from}", body: string}, ...]\nThe array of emails are sorted by date (index 0 is the oldest email, last index is the latest).\nYou must write between 4 and 5 replies based on the previous emails. You must also provide a very short (less than 6 words) description for each of your replies. The email will be sent by the user you\'ll receive in the message, so use it to know which perspective you must use.\nUse Markdown format for the body of your responses.\nUse JSON LINES for your response using this format:\n{"description": string, "body": string}\n...\n{"description": string, "body": string}\nAlways use the same language used in the emails you receive (i.e. if the emails you receive are written in English, then you will use English to write your reply. if the emails you receive are written in Spanish, then you will use Spanish to write your reply.).';
+const SYSTEM_PROMPT_WITHOUT_HINT = `You will receive an email thread formatted as JSON with the following structure:
+{subject: string, user: {name: string, address: string}, emails: Array<{header: "\${date} \${from}", body: string}>}
+The array of emails are sorted by date (index 0 is the oldest email, last index is the latest).
+You must write between 4 and 5 replies based on the previous emails.
+You must also provide a very short (less than 6 words) description for each of your replies. The email will be sent by the user you\'ll receive in the message, so use it to know which perspective you must use.
+Use Markdown format for the body of your responses.
+Use JSON LINES for your response using this format:
+{"description": string, "body": string}
+Always use the same language used in the emails you receive (i.e. if the emails you receive are written in English, then you will use English to write your reply. if the emails you receive are written in Spanish, then you will use Spanish to write your reply.).`;
+
+const SYSTEM_PROMPT_WITH_HINT = `You will receive an email thread formatted as JSON with the following structure:
+{subject: string, user: {name: string, address: string}, emails: Array<{header: "\${date} \${from}", body: string}>, hint: string}
+The array of emails are sorted by date (index 0 is the oldest email, last index is the latest).
+You must write ONLY ONE (1) reply based on the previous emails.
+You MUST use the hint field as a base to generate your response.
+You must also provide a very short (less than 6 words) description for the reply. The email will be sent by the user you\'ll receive in the message, so use it to know which perspective you must use.
+Use Markdown format for the body of your response.
+Use JSON LINES for your response using this format:
+{"description": string, "body": string}
+ALWAYS escape newlines (\\n) and the double quotes in the body of your response.
+Always use the same language used in the emails you receive (i.e. if the emails you receive are written in English, then you will use English to write your reply. if the emails you receive are written in Spanish, then you will use Spanish to write your reply.).`;
 
 /**
  * @typedef {{
@@ -24,6 +43,15 @@ const SYSTEM_PROMPT =
  *     }
  *   ]
  * }} GPTEvent
+ */
+
+/**
+ * @typedef {{
+ *  subject: string,
+ *  user: {name: string, address: string},
+ *  emails: Array<{header: string, body: string}>,
+ *  hint?: string
+ * }} GPTPayload
  */
 
 /** @typedef {{description: string, body: string}} SuggestionItem */
@@ -45,7 +73,7 @@ function partialParseJsonLines(text) {
     .filter(Boolean);
 }
 
-/** @param {{apiKey: string, body: unknown}} param0 */
+/** @param {{apiKey: string, body: GPTPayload}} param0 */
 function getRequestParams({ apiKey, body }) {
   return {
     headers: {
@@ -58,7 +86,9 @@ function getRequestParams({ apiKey, body }) {
       messages: [
         {
           role: "system",
-          content: SYSTEM_PROMPT,
+          content: body.hint
+            ? SYSTEM_PROMPT_WITH_HINT
+            : SYSTEM_PROMPT_WITHOUT_HINT,
         },
         {
           role: "user",
@@ -71,7 +101,7 @@ function getRequestParams({ apiKey, body }) {
   };
 }
 
-/** @param {{apiKey: string, body: unknown}} param0 */
+/** @param {{apiKey: string, body: GPTPayload}} param0 */
 export async function* request({ apiKey, body }) {
   /** @type {Array<SuggestionItem>} */
   let responseParsed = [];

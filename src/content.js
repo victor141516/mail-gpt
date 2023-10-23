@@ -16,23 +16,35 @@ if (!OPENAI_API_KEY) {
 const getOnComposeOpenHandler = ({ thread, user }) => {
   /** @param {InboxSDK.ComposeView} composeView */
   const onComposeOpen = async (composeView) => {
-    // const result = openai.requestMock(5);
-    const result = openai.request({
-      apiKey: OPENAI_API_KEY,
-      body: { ...thread, user },
-    });
-    inbox.setButtonsLoading(true);
-    for await (const { description, body } of result) {
-      console.log({ description, body });
-      inbox.insertButton({
-        description,
-        body,
-        onClick: () => {
-          composeView.setBodyHTML(marked.parse(body));
-        },
+    let hint = "";
+
+    const retrieveResponses = async () => {
+      // const result = openai.requestMock(5);
+      const result = openai.request({
+        apiKey: OPENAI_API_KEY,
+        body: { ...thread, user, hint },
       });
-    }
-    inbox.setButtonsLoading(false);
+      inbox.setButtonsLoading(true);
+      for await (const { description, body } of result) {
+        inbox.insertButton({
+          description,
+          body,
+          onClick: () => {
+            composeView.setBodyHTML(marked.parse(body));
+          },
+        });
+      }
+      inbox.setButtonsLoading(false);
+    };
+
+    inbox.insertSuggestionHintInput({
+      onSubmit: (newHint) => {
+        hint = newHint;
+        retrieveResponses();
+      },
+    });
+
+    retrieveResponses();
   };
   return onComposeOpen;
 };
@@ -44,7 +56,6 @@ async function main() {
   inbox.onCompose({
     onDestroy: () => gmailEventEmitter.emit("compose:close"),
     onCreate: (composeView) => {
-      inbox.insertButtonWrapper(composeView);
       gmailEventEmitter.emit("compose:open", composeView);
     },
   });

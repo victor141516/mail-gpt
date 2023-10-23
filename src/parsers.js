@@ -34,37 +34,6 @@ export const parseThreadView = (threadView) => {
     body: html2md(body.innerHTML),
     header: /** @type {string} */ (emailHeaders[index]?.textContent),
   }));
-  // const mainMessageBodyContainerElement = lastMessage.querySelector(
-  //   "div:first-child > div:first-child > div:first-child"
-  // );
-  // const mainMessageBodyContainerElement = lastMessage.querySelector(
-  //   "div > div:first-child:has(~ div.gmail_quote)"
-  // );
-
-  // if (!mainMessageBodyContainerElement) {
-  //   console.log({ lastMessage });
-  //   console.warn("Could not find main message body (1)");
-  //   debugger;
-  //   throw new Error("Could not find main message body (1)");
-  // }
-  // const isMainMessageBodyContainerElement =
-  //   mainMessageBodyContainerElement.textContent &&
-  //   lastMessage.textContent?.startsWith(
-  //     mainMessageBodyContainerElement.textContent
-  //   );
-
-  // if (!isMainMessageBodyContainerElement) {
-  //   console.log({ lastMessage, mainMessageBodyContainerElement });
-  //   console.warn("Could not find main message body (2)");
-  //   throw new Error("Could not find main message body (2)");
-  // }
-
-  // const mainMessageBodyElement = mainMessageBodyContainerElement.childNodes[0];
-
-  // if (!mainMessageBodyElement) {
-  //   console.error("Could not find main message body (3)", lastMessage);
-  //   throw new Error("Could not find main message body (3)");
-  // }
 
   /** @type {null | HTMLElement} */
   let mainMessageBodyElement = lastMessage;

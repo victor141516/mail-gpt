@@ -47,3 +47,24 @@
 #mail-gpt-suggestions_wrapper > #mail-gpt-suggestions_loading-indicator svg {
   fill: var(--primary);
 }
+
+#mail-gpt-suggestions_suggestion-hint label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#mail-gpt-suggestions_suggestion-hint label > span {
+  margin-left: 0.25rem;
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+#mail-gpt-suggestions_suggestion-hint input {
+  border: 2px solid var(--primary);
+  color: initial;
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+}

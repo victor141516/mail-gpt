@@ -5,6 +5,8 @@ const MAIL_GPT_SUGGESTIONS_WRAPPER_ELEMENT_ID = "mail-gpt-suggestions_wrapper";
 const MAIL_GPT_SUGGESTIONS_BUTTONS_ELEMENT_ID = "mail-gpt-suggestions_buttons";
 const MAIL_GPT_SUGGESTIONS_LOADING_INDICATOR_ELEMENT_ID =
   "mail-gpt-suggestions_loading-indicator";
+const MAIL_GPT_SUGGESTIONS_SUGGESTION_HINT_ELEMENT_ID =
+  "mail-gpt-suggestions_suggestion-hint";
 
 /** @type {InboxSDK.InboxSDK} */
 let _sdk;
@@ -43,6 +45,14 @@ export const getUser = async () => {
 export const onCompose = async ({ onCreate, onDestroy }) => {
   const sdk = await getSdk();
   sdk.Compose.registerComposeViewHandler((cv) => {
+    cv.getBodyElement().parentElement?.insertAdjacentHTML(
+      "beforebegin",
+      `<div id="${MAIL_GPT_SUGGESTIONS_WRAPPER_ELEMENT_ID}">
+          <form id="${MAIL_GPT_SUGGESTIONS_SUGGESTION_HINT_ELEMENT_ID}"></form>
+          <div id="${MAIL_GPT_SUGGESTIONS_BUTTONS_ELEMENT_ID}"></div>
+          <div id="${MAIL_GPT_SUGGESTIONS_LOADING_INDICATOR_ELEMENT_ID}"></div>
+        </div>`
+    );
     onCreate(cv);
     cv.on("destroy", () => onDestroy?.());
   });
@@ -55,17 +65,6 @@ export const onThread = async ({ onCreate, onDestroy }) => {
     onCreate(tv);
     tv.on("destroy", () => onDestroy?.());
   });
-};
-
-/** @param {InboxSDK.ComposeView} composeView */
-export const insertButtonWrapper = (composeView) => {
-  composeView.getBodyElement().parentElement?.insertAdjacentHTML(
-    "beforebegin",
-    `<div id="${MAIL_GPT_SUGGESTIONS_WRAPPER_ELEMENT_ID}">
-        <div id="${MAIL_GPT_SUGGESTIONS_BUTTONS_ELEMENT_ID}"></div>
-        <div id="${MAIL_GPT_SUGGESTIONS_LOADING_INDICATOR_ELEMENT_ID}"></div>
-      </div>`
-  );
 };
 
 /** @param {{description: string, body: string, onClick: () => void}} param */
@@ -92,4 +91,21 @@ export const setButtonsLoading = (isLoading) => {
   } else {
     indicatorContainer?.childNodes.forEach((child) => child.remove());
   }
+};
+
+/** @param {{onSubmit?: (value: string) => void}} param */
+export const insertSuggestionHintInput = ({ onSubmit } = {}) => {
+  const label = document.createElement("label");
+  label.innerHTML = "<span>Hint:</span>";
+  const input = document.createElement("input");
+  label.insertAdjacentElement("beforeend", input);
+  const form = document.getElementById(
+    MAIL_GPT_SUGGESTIONS_SUGGESTION_HINT_ELEMENT_ID
+  );
+  input.addEventListener("click", (event) => event.stopPropagation());
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    onSubmit?.(input.value);
+  });
+  form?.insertAdjacentElement("beforeend", label);
 };
